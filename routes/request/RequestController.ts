@@ -1,30 +1,28 @@
 import express, {Router} from "express";
-import {RegistryService} from "../../utils/RegistryService";
+import {RequestService} from "./RequestService";
+import {sendResult} from "../../utils/resolver";
 
 export class RequestController {
     router: Router;
-    registryService: RegistryService;
+    private requestService: RequestService;
+
 
     constructor() {
         this.router = express.Router();
-        this.registryService = RegistryService.instance;
+        this.requestService = new RequestService();
         this.init();
     }
 
     private init() {
         this.router.get("/", (req, res) => {
-            const userID = req.query.userID as string;
-            const code = req.query.code as string;
-
-            if (userID == null) {
-                return res.status(400).send("No user id passed!");
-            } else if (code == null) {
-                return res.status(400).send("No host code passed!");
-            }
-
-            this.registryService.request(code, userID);
-
-            res.send("ok");
+            let result =
+                this.requestService.requestHost(req.query.code as string, req.query.userID as string);
+            sendResult(res, replaceIfNull(result, "ok"));
         })
     }
+}
+
+function replaceIfNull<K, T>(original: K|null, replacement: T): K|T {
+    if (original == null) return replacement;
+    return original;
 }
