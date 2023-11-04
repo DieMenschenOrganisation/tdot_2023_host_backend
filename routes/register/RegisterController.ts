@@ -1,27 +1,23 @@
 import {Socket} from "socket.io";
-import {RegistryService} from "../../utils/RegistryService";
+import {RegisterService} from "./RegisterService";
+import {sendWSErrorIfPresent} from "../../utils/resolver";
 
 export class RegisterController {
-    private registryService: RegistryService;
-    private registeredCode: string;
+    private registerService: RegisterService;
 
     constructor(socket: Socket) {
-        this.registryService = RegistryService.instance;
-        this.registeredCode = "";
+        this.registerService = new RegisterService(socket);
         this.init(socket);
     }
 
     private init(socket: Socket) {
         socket.on("register", code => {
-            const error = this.registryService.register(code, socket);
-            if (error != null) {
-                socket.emit("error", error.type);
-            }
-            this.registeredCode = code;
+            const result = this.registerService.register(code);
+            sendWSErrorIfPresent(socket, result);
         })
 
         socket.on("disconnect", () => {
-            this.registryService.removeRegister(this.registeredCode);
+            this.registerService.removeRegistry();
         })
     }
 }

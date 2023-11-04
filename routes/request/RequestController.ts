@@ -1,6 +1,6 @@
 import express, {Router} from "express";
 import {RequestService} from "./RequestService";
-import {sendResult} from "../../utils/resolver";
+import {sendHttpResult} from "../../utils/resolver";
 
 export class RequestController {
     router: Router;
@@ -17,7 +17,7 @@ export class RequestController {
         this.router.get("/", (req, res) => {
             let result =
                 this.requestService.requestHost(req.query.code as string, req.query.userID as string);
-            sendResult(res, replaceIfNull(result, "ok"));
+            sendHttpResult(res, replaceIfNull(result, "ok"));
         })
     }
 }
